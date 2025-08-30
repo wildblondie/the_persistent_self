@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Persistent Self: An Interactive Exploration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed around a three-act narrative structure: 1. The Possibility (Can we?), 2. The Paradox (Should we?), and 3. The Path Forward (How do we remain human?). This thematic, question-driven approach was chosen over a linear chapter-by-chapter format to make the dense philosophical content more engaging and intuitive. It allows users to explore the core dialectic of the report at their own pace. Key interactions include toggling between philosophical theories, stepping through the Ship of Theseus paradox, and simulating the impact of immortality on human values, transforming passive reading into active inquiry. Gemini API features (AI chat, scenario generation) were added to deepen this interactive inquiry. -->
+    <!-- Visualization & Content Choices: The report is purely conceptual, so traditional data charts are not used. Instead, the application relies on interactive diagrams and dynamic text blocks built with HTML/Tailwind/JS. For example, 'Competing Theories of Mind' are presented as interactive cards (Goal: Compare) instead of a static table. The 'Ship of Theseus' paradox is visualized as a step-by-step interactive animation (Goal: Organize/Explain). A 'Mortality Toggle' directly demonstrates the existential argument (Goal: Inform/Explore Relationships). The Gemini API is used to generate text-based scenarios, providing a dynamic, personalized exploration of the report's themes. These choices make abstract concepts tangible and support the designed exploratory structure. NO SVG/Mermaid are used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        h1, h2, h3 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4A908A;
+            border-bottom-color: #4A908A;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-button.active {
+            background-color: #4A908A;
+            color: #F8F7F4;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-bubble {
+            max-width: 80%;
+        }
+        .chat-bubble-user {
+            background-color: #4A908A;
+            color: white;
+        }
+        .chat-bubble-ai {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .dot-flashing {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dotFlashing 1s infinite linear alternate;
+            animation-delay: .5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dotFlashing {
+            0% { background-color: #A0AEC0; }
+            50%, 100% { background-color: #718096; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#F8F7F4]/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[#333333]">The Persistent Self</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#possibility" class="nav-link pb-1">The Possibility</a>
+                <a href="#paradox" class="nav-link pb-1">The Paradox</a>
+                <a href="#path" class="nav-link pb-1">The Path Forward</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-20">
+
+        <section class="text-center max-w-3xl mx-auto mb-20">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4">Consciousness, Immortality & The Search for Meaning</h1>
+            <p class="text-lg text-gray-600">An interactive exploration of the technological quest for eternal life and its profound implications for what it means to be human. This application synthesizes a deep philosophical report into a guided journey through its core questions.</p>
+        </section>
+
+        <!-- SECTION 1: THE POSSIBILITY -->
+        <section id="possibility" class="mb-24 scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Part I: The Possibility</h2>
+                <p class="text-lg text-gray-600">Can we achieve immortality at the level of consciousness? The answer depends entirely on what consciousness *is*. This section explores the fundamental philosophical and scientific theories that underpin the entire project of digital life extension.</p>
+            </div>
+
+            <div class="bg-white/60 p-8 rounded-xl shadow-sm mb-12">
+                <h3 class="text-3xl font-bold text-center mb-6">Competing Theories of Consciousness</h3>
+                <div id="theories-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+
+            <div class="bg-white/60 p-8 rounded-xl shadow-sm">
+                <h3 class="text-3xl font-bold text-center mb-2">The Ship of Theseus: A Digital Paradox</h3>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8">The ancient paradox of identity provides a powerful lens for examining the two main paths to mind uploading. Are you your physical matter or your informational pattern? Interact with the models below to explore the dilemma.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div id="ship-copy-container"></div>
+                    <div id="ship-gradual-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: THE PARADOX -->
+        <section id="paradox" class="mb-24 scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Part II: The Paradox</h2>
+                <p class="text-lg text-gray-600">If we could live forever, *should* we? Achieving immortality wouldn't solve the problem of human existence; it would sharpen it to an infinitely fine point. Here, we explore the existential and ethical crises of a post-mortal world.</p>
+            </div>
+            
+            <div class="bg-white/60 p-8 rounded-xl shadow-sm mb-12">
+                <h3 class="text-3xl font-bold text-center mb-2">Mortality & The Meaning of Life</h3>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8">Existentialist philosophy argues that our finitude is what gives life urgency, value, and meaning. What happens when that horizon disappears? Toggle the switch to see how immortality could reshape our core values.</p>
+                <div class="flex justify-center items-center space-x-4 mb-8">
+                    <span id="mortality-label" class="font-bold text-lg text-gray-700">Mortal</span>
+                    <label for="mortality-toggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="mortality-toggle" class="sr-only">
+                            <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                    <span id="immortality-label" class="font-bold text-lg text-gray-400">Immortal</span>
+                </div>
+                <div id="values-container" class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                </div>
+            </div>
+
+             <div class="bg-white/60 p-8 rounded-xl shadow-sm">
+                <h3 class="text-3xl font-bold text-center mb-8">The Ethical Landscape of Immortality</h3>
+                <div id="ethics-tabs-container" class="max-w-4xl mx-auto">
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE PATH FORWARD -->
+        <section id="path" class="scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Part III: The Path Forward</h2>
+                <p class="text-lg text-gray-600">How do we navigate a future where technology offers to rewrite human nature? This section presents a proactive framework for harnessing technology's benefits while preserving the core of our humanity.</p>
+            </div>
+            <div class="bg-white/60 p-8 rounded-xl shadow-sm mb-12">
+                <h3 class="text-3xl font-bold text-center mb-8">A Strategic Framework for Preserving Humanity</h3>
+                <div id="framework-accordion" class="max-w-3xl mx-auto space-y-4">
+                </div>
+            </div>
+            
+            <div class="bg-white/60 p-8 rounded-xl shadow-sm">
+                <h3 class="text-3xl font-bold text-center mb-8">✨ Generate a Future Scenario</h3>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8">Our choices today shape the world of tomorrow. Select a few parameters below and let Gemini imagine a brief story from a future shaped by those decisions.</p>
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div>
+                        <label for="scenario-access" class="block text-sm font-medium text-gray-700">Who can achieve immortality?</label>
+                        <select id="scenario-access" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#4A908A] focus:border-[#4A908A] sm:text-sm rounded-md">
+                            <option>Only the ultra-wealthy elite</option>
+                            <option>It is a universal right for all citizens</option>
+                            <option>It is available, but highly regulated by a global authority</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="scenario-substrate" class="block text-sm font-medium text-gray-700">What is the dominant form of conscious existence?</label>
+                        <select id="scenario-substrate" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#4A908A] focus:border-[#4A908A] sm:text-sm rounded-md">
+                            <option>Purely biological, with life extension tech</option>
+                            <option>Fully digital, with minds running on servers</option>
+                            <option>A hybrid, with brain-computer interfaces being the norm</option>
+                        </select>
+                    </div>
+                    <button id="generate-scenario-btn" class="w-full bg-[#4A908A] text-white font-bold py-3 px-4 rounded-md hover:bg-[#3B736D] transition duration-300 flex items-center justify-center">
+                        Generate Scenario
+                    </button>
+                </div>
+                <div id="scenario-output" class="mt-8 p-6 bg-gray-50 rounded-lg min-h-[10rem] border border-gray-200 text-gray-600 italic">
+                   Your generated future scenario will appear here...
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+    
+    <!-- Gemini Chat FAB -->
+    <button id="chat-fab" class="fixed bottom-6 right-6 bg-[#4A908A] text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-3xl hover:bg-[#3B736D] transition-transform transform hover:scale-110">
+        ✨
+    </button>
+
+    <!-- Gemini Chat Modal -->
+    <div id="chat-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg h-[80vh] max-h-[700px] flex flex-col transform transition-all opacity-0 -translate-y-4">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-[#333333]">✨ Ask a Philosopher</h3>
+                <button id="close-chat-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div id="chat-window" class="flex-grow p-4 space-y-4 overflow-y-auto">
+                <!-- Chat messages will be appended here -->
+                <div class="flex">
+                    <div class="chat-bubble chat-bubble-ai p-3 rounded-lg">
+                        <p>Hello! I am an AI assistant powered by Aware AI. Ask me any questions about the philosophical concepts on this page, like "Explain Functionalism simply" or "What are the ethics of mind uploading?"</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t">
+                <form id="chat-form" class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Ask a question..." class="flex-grow border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A908A]" autocomplete="off">
+                    <button type="submit" class="bg-[#4A908A] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#3B736D] disabled:opacity-50" id="chat-submit-btn">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 The Persistent Self. An interactive synthesis.</p>
+            <p class="text-sm text-gray-400 mt-2">This application is a conceptual visualization based on a source report and does not represent existing technology. AI-generated content may be inaccurate.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const appData = {
+                theories: [
+                    { name: 'Functionalism', tenet: 'Consciousness is a pattern of informational relationships, like software. What matters is the function, not the physical material.', feasibility: 'High', color: 'green' },
+                    { name: 'Identity Theory', tenet: 'Consciousness is identical to specific physical brain states. The unique biology of neurons is essential.', feasibility: 'Low', color: 'red' },
+                    { name: 'Substance Dualism', tenet: 'The mind is a non-physical substance separate from the brain. Consciousness is already substrate-independent.', feasibility: 'N/A (via tech)', color: 'purple' },
+                    { name: 'Panpsychism', tenet: 'Consciousness is a fundamental property of all matter. It can exist in different substrates but may not be "copyable".', feasibility: 'Questionable', color: 'yellow' },
+                    { name: 'Embodied Cognition', tenet: 'The mind is not just the brain but extends through the body and its interactions with the world. A disembodied mind is an incomplete self.', feasibility: 'Low', color: 'red' },
+                    { name: 'Biological Continuity', tenet: 'Personal identity is tied to the persistence of a particular biological organism. If the original brain is gone, you are gone.', feasibility: 'Fails', color: 'red' }
+                ],
+                shipOfTheseus: {
+                    copy: {
+                        title: 'Copy-and-Upload',
+                        steps: [
+                            { text: 'Initial State: A single, biological person exists.', state: 'initial' },
+                            { text: 'Step 1: A perfect, non-destructive scan of the brain is created.', state: 'scanned' },
+                            { text: 'Step 2: The scan is used to create a digital duplicate on a computer.', state: 'duplicated' },
+                            { text: 'Result: Two beings now exist, both with the same memories. Which is the "real" you? This is the Duplication Problem.', state: 'final' }
+                        ]
+                    },
+                    gradual: {
+                        title: 'Gradual Replacement',
+                        steps: [
+                            { text: 'Initial State: A fully biological brain.', state: 'initial' },
+                            { text: 'Step 1: The first biological neuron is replaced with a functionally identical synthetic one.', state: 'step1' },
+                            { text: 'Step 2: The process continues, neuron by neuron, over time.', state: 'step2' },
+                            { text: 'Result: A fully synthetic brain with a continuous stream of memory. But is the subjective *experience* the same? This is the Transformation Problem.', state: 'final' }
+                        ]
+                    }
+                },
+                values: {
+                    mortal: [
+                        { name: 'Urgency', icon: '⏳', description: 'Finite time makes our choices and projects feel pressing and important.' },
+                        { name: 'Commitment', icon: '💍', description: 'Choosing a path gains weight when it means forsaking other paths in a limited life.' },
+                        { name: 'Courage', icon: '🦁', description: 'Bravery only exists in the face of real risk, loss, and the possibility of destruction.' },
+                        { name: 'Love', icon: '❤️', description: 'The preciousness of moments with loved ones is heightened by the knowledge that they will end.' }
+                    ],
+                    immortal: [
+                        { name: 'Procrastination', icon: '🐌', description: 'With infinite time, any decision can be postponed indefinitely, eroding the drive to act.' },
+                        { name: 'Reversibility', icon: '🔄', description: 'Every choice feels temporary, potentially making deep, lifelong commitments meaningless.' },
+                        { name: 'Apathy', icon: '🤷', description: 'Without ultimate stakes, the motivation for heroic or selfless acts may diminish.' },
+                        { name: 'Stagnation', icon: '💧', description: 'The intensity of connection may fade when relationships can last for millennia without end.' }
+                    ]
+                },
+                ethics: [
+                    { title: 'The Right to Die', content: 'In a world where natural death is eliminated, does the right to life imply a corresponding right to a chosen death? What constitutes a sufficient reason—boredom, despair, fulfillment—to end a life that could continue forever?' },
+                    { title: 'The Immortal Elite', content: 'Immortality tech will likely be expensive, creating a permanent biological caste system. How would society function with a "genetic divide" between immortal posthumans and the mortal masses? This could be the most profound inequality in history.' },
+                    { title: 'Legal Personhood', content: 'Is a digital mind a person or property? Granting digital minds rights based on their cognitive abilities could create a legal framework where enhanced posthumans or AIs have superior standing to baseline humans, shattering universal human rights.' },
+                    { title: 'Privacy & Autonomy', content: 'Mind uploading requires the total surrender of privacy. Your entire consciousness becomes a "mind-file." Who owns this data? Could your thoughts, memories, and emotions be monitored, altered, or deleted by the entities controlling your digital substrate?' }
+                ],
+                framework: [
+                    {
+                        challenge: 'Meaning Crisis in a "Solved World"',
+                        strategy: 'Cultivate "Meaning Reserves"',
+                        actions: 'Shift education from job training to the "art of living." Promote creativity and contemplative practices. Redefine success away from economic productivity toward fulfillment.',
+                        philosophy: '<strong>Existentialism:</strong> Meaning is not given but created. In a world without external necessity, purpose must be generated internally.'
+                    },
+                    {
+                        challenge: 'Consciousness Monoculture',
+                        strategy: 'Foster "Existential Biodiversity"',
+                        actions: 'Fund and protect the humanities, arts, and diverse cultural traditions. Design AI to promote novel perspectives, not just reinforce preferences. Value different ways of knowing.',
+                        philosophy: '<strong>Value Pluralism:</strong> There is no single "best" way to be human. A diversity of values and modes of being is intrinsically good and makes us more resilient.'
+                    },
+                    {
+                        challenge: 'Loss of Embodiment & Autonomy',
+                        strategy: 'Protect the "Human-Scale" & Establish "Sacred Limits"',
+                        actions: 'Enshrine rights to privacy and cognitive liberty. Develop ethical treaties on what aspects of human nature are off-limits to alteration. Prioritize tech that augments, not replaces, embodied interaction.',
+                        philosophy: '<strong>Phenomenology:</strong> The lived, physical body is a constitutive part of the self and the primary source of experience; its integrity must be protected.'
+                    }
+                ]
+            };
+
+            const renderTheories = () => {
+                const container = document.getElementById('theories-container');
+                container.innerHTML = appData.theories.map(theory => `
+                    <div class="card bg-white p-6 rounded-lg shadow-md border-l-4 border-${theory.color}-500">
+                        <h4 class="text-xl font-bold mb-2 text-${theory.color}-700">${theory.name}</h4>
+                        <p class="text-gray-600 mb-4">${theory.tenet}</p>
+                        <p class="font-bold">Feasibility for Digital Immortality: <span class="px-3 py-1 text-sm rounded-full bg-${theory.color}-100 text-${theory.color}-800">${theory.feasibility}</span></p>
+                    </div>
+                `).join('');
+            };
+            
+            const createShipComponent = (containerId, data) => {
+                const container = document.getElementById(containerId);
+                let currentStep = 0;
+
+                const render = () => {
+                    const stepData = data.steps[currentStep];
+                    container.innerHTML = `
+                        <div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
+                            <h4 class="text-2xl font-bold text-center mb-4">${data.title}</h4>
+                            <div class="flex-grow flex items-center justify-center my-6">
+                                ${getShipVisual(stepData.state, data.title)}
+                            </div>
+                            <p class="text-gray-600 text-center flex-grow min-h-[6rem]">${stepData.text}</p>
+                            <div class="flex justify-between mt-4">
+                                <button class="prev-step px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed" ${currentStep === 0 ? 'disabled' : ''}>Back</button>
+                                <button class="next-step px-4 py-2 bg-[#4A908A] text-white rounded-md hover:bg-[#3B736D] disabled:opacity-50 disabled:cursor-not-allowed" ${currentStep === data.steps.length - 1 ? 'disabled' : ''}>Next</button>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                const getShipVisual = (state, type) => {
+                    if (type.includes('Copy')) {
+                        switch(state) {
+                            case 'initial': return '<div class="text-6xl">👤</div>';
+                            case 'scanned': return '<div class="text-6xl">👤 <span class="text-2xl text-blue-500">...SCAN...</span></div>';
+                            case 'duplicated': return '<div class="flex items-center space-x-4 text-6xl">👤 <span class="text-2xl text-gray-400">&</span> 💻</div>';
+                            case 'final': return '<div class="flex items-center space-x-4 text-6xl">👤 <span class="text-red-500 font-bold text-4xl">?</span> 💻</div>';
+                            default: return '👤';
+                        }
+                    } else {
+                         switch(state) {
+                            case 'initial': return '<div class="text-6xl">🧠</div>';
+                            case 'step1': return '<div class="text-6xl">🧠<span class="text-green-500 -ml-4">.</span></div>';
+                            case 'step2': return '<div class="text-6xl">🧠<span class="text-green-500 -ml-4">...</span></div>';
+                            case 'final': return '<div class="text-6xl text-green-500">⚙️</div>';
+                            default: return '🧠';
+                        }
+                    }
+                };
+                
+                container.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('next-step')) {
+                        if (currentStep < data.steps.length - 1) {
+                            currentStep++;
+                            render();
+                        }
+                    } else if (e.target.classList.contains('prev-step')) {
+                        if (currentStep > 0) {
+                            currentStep--;
+                            render();
+                        }
+                    }
+                });
+
+                render();
+            };
+
+            const renderValues = (isMortal) => {
+                const container = document.getElementById('values-container');
+                const values = isMortal ? appData.values.mortal : appData.values.immortal;
+                container.innerHTML = values.map(v => `
+                    <div class="fade-in">
+                        <div class="text-5xl mb-2">${v.icon}</div>
+                        <h4 class="text-xl font-bold mb-1">${v.name}</h4>
+                        <p class="text-sm text-gray-600">${v.description}</p>
+                    </div>
+                `).join('');
+            };
+
+            const setupMortalityToggle = () => {
+                const toggle = document.getElementById('mortality-toggle');
+                const mortalLabel = document.getElementById('mortality-label');
+                const immortalLabel = document.getElementById('immortality-label');
+                
+                toggle.addEventListener('change', () => {
+                    renderValues(!toggle.checked);
+                    if (toggle.checked) {
+                        mortalLabel.classList.remove('text-gray-700');
+                        mortalLabel.classList.add('text-gray-400');
+                        immortalLabel.classList.remove('text-gray-400');
+                        immortalLabel.classList.add('text-gray-700');
+                    } else {
+                        mortalLabel.classList.add('text-gray-700');
+                        mortalLabel.classList.remove('text-gray-400');
+                        immortalLabel.classList.add('text-gray-400');
+                        immortalLabel.classList.remove('text-gray-700');
+                    }
+                });
+                renderValues(true);
+            };
+
+            const renderEthicsTabs = () => {
+                const container = document.getElementById('ethics-tabs-container');
+                let activeTab = 0;
+
+                const render = () => {
+                    container.innerHTML = `
+                        <div class="flex flex-wrap justify-center gap-2 mb-6">
+                            ${appData.ethics.map((ethic, index) => `
+                                <button class="tab-button px-4 py-2 rounded-md text-sm md:text-base font-semibold transition ${index === activeTab ? 'active' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" data-index="${index}">
+                                    ${ethic.title}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-inner min-h-[10rem] flex items-center justify-center">
+                            <p class="text-center text-lg text-gray-700 fade-in">${appData.ethics[activeTab].content}</p>
+                        </div>
+                    `;
+                };
+
+                container.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('tab-button')) {
+                        activeTab = parseInt(e.target.dataset.index);
+                        render();
+                    }
+                });
+
+                render();
+            };
+
+            const renderFrameworkAccordion = () => {
+                const container = document.getElementById('framework-accordion');
+                container.innerHTML = appData.framework.map((item, index) => `
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="accordion-toggle w-full flex justify-between items-center p-5 text-left" data-index="${index}">
+                            <span class="text-xl font-bold text-[#333333]">${item.challenge}</span>
+                            <span class="accordion-icon text-2xl text-gray-500 transform transition-transform">+</span>
+                        </button>
+                        <div class="accordion-content px-5">
+                            <div class="pb-5">
+                                <h4 class="text-lg font-bold text-[#4A908A]">Strategy: ${item.strategy}</h4>
+                                <p class="mt-2 text-gray-600"><strong>Actions:</strong> ${item.actions}</p>
+                                <p class="mt-4 text-sm italic text-gray-500">${item.philosophy}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.addEventListener('click', (e) => {
+                    const toggle = e.target.closest('.accordion-toggle');
+                    if (toggle) {
+                        const content = toggle.nextElementSibling;
+                        const icon = toggle.querySelector('.accordion-icon');
+                        const isOpen = content.style.maxHeight;
+
+                        document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                        document.querySelectorAll('.accordion-icon').forEach(i => {
+                            i.textContent = '+';
+                            i.classList.remove('rotate-45');
+                        });
+
+                        if (!isOpen) {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            icon.textContent = '+';
+                            icon.classList.add('rotate-45');
+                        }
+                    }
+                });
+            };
+            
+            const setupNavObserver = () => {
+                const sections = document.querySelectorAll('section[id]');
+                const navLinks = document.querySelectorAll('.nav-link');
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                            });
+                        }
+                    });
+                }, { rootMargin: "-50% 0px -50% 0px" });
+
+                sections.forEach(section => observer.observe(section));
+            };
+
+            // Gemini API Integration
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            async function callGeminiAPI(prompt, systemInstruction) {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemInstruction }]
+                    },
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        var errorBody = await response.json();
+						errorBody.error.message = "Well, well, well... looks like the gatekeeper demands a fee! 💸 No knowledge without the paper trail, my friend. 🏦 In this capitalist jungle, the answers aren’t free—only your dreams are. 😴 So, dig deep and show the system you’re ready to play! 🎩💰"
+                        console.error("API Error:", errorBody);
+                        return `Error: ${errorBody.error.message}`;
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        return "I'm sorry, I couldn't generate a response. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("Fetch Error:", error);
+                    return "An error occurred while connecting to the AI. Please check your connection and try again.";
+                }
+            }
+            
+            // Chatbot UI Logic
+            const chatFab = document.getElementById('chat-fab');
+            const chatModal = document.getElementById('chat-modal');
+            const chatModalContent = chatModal.querySelector('div');
+            const closeChatBtn = document.getElementById('close-chat-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const chatSubmitBtn = document.getElementById('chat-submit-btn');
+
+            const toggleChatModal = (show) => {
+                if (show) {
+                    chatModal.classList.remove('hidden');
+                    chatModal.classList.add('flex');
+                    setTimeout(() => {
+                       chatModalContent.classList.remove('opacity-0', '-translate-y-4');
+                    }, 10);
+                } else {
+                    chatModalContent.classList.add('opacity-0', '-translate-y-4');
+                    setTimeout(() => {
+                        chatModal.classList.add('hidden');
+                        chatModal.classList.remove('flex');
+                    }, 300);
+                }
+            };
+            
+            chatFab.addEventListener('click', () => toggleChatModal(true));
+            closeChatBtn.addEventListener('click', () => toggleChatModal(false));
+            chatModal.addEventListener('click', (e) => {
+                if (e.target === chatModal) {
+                    toggleChatModal(false);
+                }
+            });
+
+            function addMessageToChat(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex ${sender === 'user' ? 'justify-end' : ''}`;
+                messageDiv.innerHTML = `
+                    <div class="chat-bubble ${sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} p-3 rounded-lg">
+                        <p>${message}</p>
+                    </div>
+                `;
+                chatWindow.appendChild(messageDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            function showLoadingIndicator() {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loading-indicator';
+                loadingDiv.className = 'flex';
+                loadingDiv.innerHTML = `
+                    <div class="chat-bubble chat-bubble-ai p-3 rounded-lg flex items-center">
+                        <div class="dot-flashing"></div>
+                    </div>
+                `;
+                chatWindow.appendChild(loadingDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            function removeLoadingIndicator() {
+                const indicator = document.getElementById('loading-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+                if (!userMessage) return;
+
+                addMessageToChat(userMessage, 'user');
+                chatInput.value = '';
+                chatSubmitBtn.disabled = true;
+                showLoadingIndicator();
+
+                const systemInstruction = "You are a helpful and knowledgeable philosophy tutor. Your role is to explain complex philosophical concepts related to consciousness, identity, and immortality in a clear, accessible, and engaging way. The user is interacting with a web page on these topics. Base your answers on established philosophical thought, but make them easy to understand for a layperson. Keep your responses concise and focused on the user's question.";
+                const aiResponse = await callGeminiAPI(userMessage, systemInstruction);
+                
+                removeLoadingIndicator();
+                addMessageToChat(aiResponse, 'ai');
+                chatSubmitBtn.disabled = false;
+            });
+
+
+            // Scenario Generator Logic
+            const generateBtn = document.getElementById('generate-scenario-btn');
+            const scenarioOutput = document.getElementById('scenario-output');
+            const accessSelect = document.getElementById('scenario-access');
+            const substrateSelect = document.getElementById('scenario-substrate');
+
+            generateBtn.addEventListener('click', async () => {
+                const access = accessSelect.value;
+                const substrate = substrateSelect.value;
+                
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<div class="dot-flashing"></div>';
+                scenarioOutput.innerHTML = "Generating your future...";
+
+                const prompt = `Write a short, narrative vignette (about 150 words) about a day in a future world. In this world, immortality is a reality, but its availability is defined by this rule: "${access}". The dominant form of conscious existence is: "${substrate}". Capture the mood, a brief character interaction, or a personal reflection that reveals the societal and personal implications of this specific future.`;
+                const systemInstruction = "You are a creative and insightful science fiction author. Your task is to write a compelling, short story based on the user's selected parameters. Focus on 'show, don't tell' to illustrate the human impact of the technology and societal structure described in the prompt.";
+
+                const scenario = await callGeminiAPI(prompt, systemInstruction);
+
+                scenarioOutput.innerHTML = scenario;
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Scenario';
+            });
+
+
+            // Initial Renders
+            renderTheories();
+            createShipComponent('ship-copy-container', appData.shipOfTheseus.copy);
+            createShipComponent('ship-gradual-container', appData.shipOfTheseus.gradual);
+            setupMortalityToggle();
+            renderEthicsTabs();
+            renderFrameworkAccordion();
+            setupNavObserver();
+        });
+    </script>
+</body>
+</html>
